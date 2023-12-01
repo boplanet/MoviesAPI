@@ -26,8 +26,22 @@ namespace MoviesAPI.Services
 
         public Movie DohvatiFilmPoId(int id)
         {
-            return _context.Movie.FirstOrDefault(m => m.Id == id);
+          
+                return _context.Movie.FirstOrDefault( m => m.Id == id);
         }
+        /*Ili makne se u cotroleru opcija provjere null
+         public IActionResult DohvatiFilmPoId(int id)
+        {
+            var mf = _context.Movie.FirstOrDefault(m => m.Id == id);
+
+            if (mf != null)
+            {
+                return new OkObjectResult(mf);
+            }
+
+            return new NotFoundResult();
+        }
+         */
 
         public void UpdateMovie(int id, MovieVM updatedMovie)
         {
