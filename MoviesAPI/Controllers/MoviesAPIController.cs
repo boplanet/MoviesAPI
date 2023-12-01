@@ -8,12 +8,10 @@ using System.Linq;
 [Route("api/Movie")]
 public class MoviesAPIController : ControllerBase
 {
-    private readonly MoviesAPIdbContext _dbContext;
     private readonly MoviesAPIService _moviesAPIService;
 
-    public MoviesAPIController(MoviesAPIdbContext dbContext, MoviesAPIService moviesAPIService)
+    public MoviesAPIController(MoviesAPIService moviesAPIService)
     {
-        _dbContext = dbContext;
         _moviesAPIService = moviesAPIService;
     }
 
@@ -21,7 +19,7 @@ public class MoviesAPIController : ControllerBase
     [HttpGet]
     public IActionResult DohvatiSveFilmove()
     {
-        var filmovi = _dbContext.Movie.ToList();
+        var filmovi = _moviesAPIService.DohvatiSveFilmove();
         return Ok(filmovi);
     }
 
@@ -29,13 +27,11 @@ public class MoviesAPIController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult DohvatiFilmPoId(int id)
     {
-        var film = _dbContext.Movie.FirstOrDefault(f => f.Id == id);
-
+        var film = _moviesAPIService.DohvatiFilmPoId(id);
         if (film == null)
         {
             return NotFound();
         }
-
         return Ok(film);
     }
 
@@ -43,18 +39,7 @@ public class MoviesAPIController : ControllerBase
     [HttpPut("{id}")]
     public IActionResult AzurirajFilm(int id, [FromBody] MovieVM noviPodaci)
     {
-        var stariFilm = _dbContext.Movie.FirstOrDefault(f => f.Id == id);
-
-        if (stariFilm == null)
-        {
-            return NotFound();
-        }
-        stariFilm.Name = noviPodaci.Name;
-        stariFilm.Year = noviPodaci.Year;
-        stariFilm.Genre = noviPodaci.Genre;
-
-        _dbContext.SaveChanges();
-
+        _moviesAPIService.UpdateMovie(id, noviPodaci);
         return NoContent();
     }
 
@@ -62,25 +47,16 @@ public class MoviesAPIController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult ObrisiFilm(int id)
     {
-        var film = _dbContext.Movie.FirstOrDefault(f => f.Id == id);
-
-        if (film == null)
-        {
-            return NotFound();
-        }
-
-        _dbContext.Movie.Remove(film);
-        _dbContext.SaveChanges();
-
+        _moviesAPIService.DeleteMovie(id);
         return NoContent();
     }
 
-    // Dodavanje filma
+    // Dodavanje filma kroz servis
     [HttpPost]
     public IActionResult DodajFilm([FromBody] MovieVM noviFilm)
     {
         _moviesAPIService.AddMovie(noviFilm);
-
         return CreatedAtAction(nameof(DohvatiFilmPoId), new { id = noviFilm.Id }, noviFilm);
     }
 }
+
